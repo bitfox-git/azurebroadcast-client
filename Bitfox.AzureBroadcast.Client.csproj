@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Bitfox.AzureBroadcast</RootNamespace>
+    <AssemblyName>Bitfox.AzureBroadcast.Client</AssemblyName>
+    <Copyright>Bitfox</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/bitfox-git/azurebroadcast-client</RepositoryUrl>
+    <Authors>Lucas Vos</Authors>
+    <Company>Bitfox</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="1.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+  </ItemGroup>
+
+</Project>
