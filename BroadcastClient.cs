@@ -11,13 +11,21 @@ namespace Bitfox.AzureBroadcast
     public class BroadcastClient<T>
     {
 
+
+        public class MessageWrapper : IMessageInfo {
+            public T msg;
+            public string toGroupName {get;set;}
+            public string toUser {get;set;}
+            public string fromUser {get;set;}
+        }
+
         private HubConnection connection;
         private HttpClient httpClient;
         private string baseAzureFunctionUrl;
         private string userId;
 
 
-        public Action<T> onMessage = null;
+        public Action<T, MessageWrapper> onMessage = null;
 
         public BroadcastClient(string AzureFunctionUrl) :
             this(AzureFunctionUrl, new Guid().ToString())
@@ -30,7 +38,7 @@ namespace Bitfox.AzureBroadcast
             this.userId = userId;
             httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("x-ms-signalr-userid", userId);
-
+           
             //TODO 1.1 feature; add SharedSecret to public Azure Function.
             //httpClient.DefaultRequestHeaders.Add("x-bf-sharedsecret", "");
         }
@@ -74,10 +82,10 @@ namespace Bitfox.AzureBroadcast
             };
 
             //Call the delegate when receiving message.
-            connection.On<string>("newMessage", (message) =>
+            connection.On<string>("newMessage", (wrappedmessage) =>
             {
-                T messageObject = JsonConvert.DeserializeObject<T>(message);
-                onMessage?.Invoke(messageObject);
+                MessageWrapper messageObject = JsonConvert.DeserializeObject<MessageWrapper>(wrappedmessage);
+                onMessage?.Invoke(messageObject.msg,messageObject);
             });
 
             await connection.StartAsync();
@@ -86,7 +94,68 @@ namespace Bitfox.AzureBroadcast
         public async void Send(T message)
         {
             var url = $"{baseAzureFunctionUrl}api/broadcast";
-            var msg = JsonConvert.SerializeObject(message);
+            var wrapped = new MessageWrapper(){
+                toGroupName="",
+                toUser="",
+                fromUser=userId,
+                msg = message
+            };
+            var msg = JsonConvert.SerializeObject(wrapped);
+            HttpContent c = new StringContent(msg, Encoding.UTF8, "application/json");
+            await httpClient.PostAsync(url, c);
+        }
+
+        public async void SendToGroup(T message, string groupName)
+        {
+            var url = $"{baseAzureFunctionUrl}api/broadcast";
+            var wrapped = new MessageWrapper(){
+                toGroupName=groupName,
+                toUser="",
+                fromUser=userId,
+                msg = message
+            };
+            var msg = JsonConvert.SerializeObject(wrapped);
+            HttpContent c = new StringContent(msg, Encoding.UTF8, "application/json");
+            await httpClient.PostAsync(url, c);
+        }
+
+         public async void SendToUser(T message, string user)
+        {
+            var url = $"{baseAzureFunctionUrl}api/broadcast";
+            var wrapped = new MessageWrapper(){
+                toGroupName="",
+                toUser=user,
+                fromUser=userId,
+                msg = message
+            };
+            var msg = JsonConvert.SerializeObject(wrapped);
+            HttpContent c = new StringContent(msg, Encoding.UTF8, "application/json");
+            await httpClient.PostAsync(url, c);
+        }
+
+
+        public async void JoinGroup(string groupName){
+            var url = $"{baseAzureFunctionUrl}api/groupaction";
+
+            GroupActionMessage gam = new GroupActionMessage() {
+                groupAction= GroupAction.Add,
+                groupName = groupName
+            };
+            //convert gam to json
+            var msg = JsonConvert.SerializeObject(gam);
+            HttpContent c = new StringContent(msg, Encoding.UTF8, "application/json");
+            await httpClient.PostAsync(url, c);
+        }
+
+        public async void LeaveGroup(string groupName){
+            var url = $"{baseAzureFunctionUrl}api/groupaction";
+
+            GroupActionMessage gam = new GroupActionMessage() {
+                groupAction= GroupAction.Remove,
+                groupName = groupName
+            };
+            //convert gam to json
+            var msg = JsonConvert.SerializeObject(gam);
             HttpContent c = new StringContent(msg, Encoding.UTF8, "application/json");
             await httpClient.PostAsync(url, c);
         }

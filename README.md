@@ -4,7 +4,7 @@ Part of the Serverless Azure-based .Net 2.0 Standard Broadcast solution.
 
 # Introduction
 
-Azure provides a fully managed and scalable SignalR service for real-time communication, but... It still requires a back-end to trigger messages. Fortunately you can use Azure Functions for that to get a full serverless experience! A lot of sample implementations exists, but they are either incomplete, specialized messaging or complex. 
+Azure provides a fully managed and scalable SignalR service for real-time communication, but... It still requires a back-end to trigger messages. Fortunately you can use Azure Functions for that to get a full serverless experience! A lot of sample implementations of these functions exists, but they are either incomplete or complex. 
 
 This solution gives you a predefined set of Azure Functions, with corresponding Client library to get you started with real-time communication in any (desktop, web) .net standard 2.0 application with your own custom message structure. 
 
