@@ -11,25 +11,18 @@ namespace Bitfox.AzureBroadcast
     public class BroadcastClient<T>
     {
 
-
-        public class MessageWrapper : IMessageInfo {
-            public T msg;
-            public string toGroupName {get;set;}
-            public string toUser {get;set;}
-            public string fromUser {get;set;}
-        }
-
         private HubConnection connection;
         private HttpClient httpClient;
         private string baseAzureFunctionUrl;
         private string userId;
 
 
-        public Action<T, MessageWrapper> onMessage = null;
+        public Action<T, IBroadcastInfo> onMessage = null;
 
         public BroadcastClient(string AzureFunctionUrl) :
-            this(AzureFunctionUrl, new Guid().ToString())
+            this(AzureFunctionUrl, Guid.NewGuid().ToString())
         {
+            
         }
 
         public BroadcastClient(string AzureFunctionUrl, string userId)
@@ -84,8 +77,9 @@ namespace Bitfox.AzureBroadcast
             //Call the delegate when receiving message.
             connection.On<string>("newMessage", (wrappedmessage) =>
             {
-                MessageWrapper messageObject = JsonConvert.DeserializeObject<MessageWrapper>(wrappedmessage);
-                onMessage?.Invoke(messageObject.msg,messageObject);
+                BroadcastMessage messageObject = JsonConvert.DeserializeObject<BroadcastMessage>(wrappedmessage);
+                T message = JsonConvert.DeserializeObject<T>(messageObject.jsonmessage);
+                onMessage?.Invoke(message, messageObject);
             });
 
             await connection.StartAsync();
@@ -94,11 +88,11 @@ namespace Bitfox.AzureBroadcast
         public async void Send(T message)
         {
             var url = $"{baseAzureFunctionUrl}api/broadcast";
-            var wrapped = new MessageWrapper(){
+            var wrapped =  new BroadcastMessage() {
                 toGroupName="",
                 toUser="",
                 fromUser=userId,
-                msg = message
+               jsonmessage = JsonConvert.SerializeObject(message)
             };
             var msg = JsonConvert.SerializeObject(wrapped);
             HttpContent c = new StringContent(msg, Encoding.UTF8, "application/json");
@@ -108,11 +102,11 @@ namespace Bitfox.AzureBroadcast
         public async void SendToGroup(T message, string groupName)
         {
             var url = $"{baseAzureFunctionUrl}api/broadcast";
-            var wrapped = new MessageWrapper(){
+            var wrapped = new BroadcastMessage(){
                 toGroupName=groupName,
                 toUser="",
                 fromUser=userId,
-                msg = message
+                jsonmessage = JsonConvert.SerializeObject(message)
             };
             var msg = JsonConvert.SerializeObject(wrapped);
             HttpContent c = new StringContent(msg, Encoding.UTF8, "application/json");
@@ -122,11 +116,11 @@ namespace Bitfox.AzureBroadcast
          public async void SendToUser(T message, string user)
         {
             var url = $"{baseAzureFunctionUrl}api/broadcast";
-            var wrapped = new MessageWrapper(){
+            var wrapped = new BroadcastMessage(){
                 toGroupName="",
                 toUser=user,
                 fromUser=userId,
-                msg = message
+                jsonmessage = JsonConvert.SerializeObject(message)
             };
             var msg = JsonConvert.SerializeObject(wrapped);
             HttpContent c = new StringContent(msg, Encoding.UTF8, "application/json");
