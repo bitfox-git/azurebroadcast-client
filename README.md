@@ -8,7 +8,7 @@ Azure provides a fully managed and scalable SignalR service for real-time commun
 
 This solution gives you a predefined set of Azure Functions, with corresponding Client library to get you started with real-time communication in any (desktop, web) .net standard 2.0 application with your own custom message structure.  
  
-## AzureBroadcast.Client
+## AzureBroadcast.Client 
 A .net standard 2.0 client-side library to be used alongside the Azure Functions and Azure SignalR service for a full serverless setup. 
 
 
