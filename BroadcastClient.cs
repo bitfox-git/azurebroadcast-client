@@ -19,21 +19,19 @@ namespace Bitfox.AzureBroadcast
 
         public Action<T, IBroadcastInfo> onMessage = null;
 
-        public BroadcastClient(string AzureFunctionUrl) :
-            this(AzureFunctionUrl, Guid.NewGuid().ToString())
+        public BroadcastClient(string AzureFunctionUrl, string FunctionHostKey) :
+            this(AzureFunctionUrl, FunctionHostKey, Guid.NewGuid().ToString())
         {
             
         }
 
-        public BroadcastClient(string AzureFunctionUrl, string userId)
+        public BroadcastClient(string AzureFunctionUrl, string FunctionHostKey, string userId)
         {
             this.baseAzureFunctionUrl = urlEndsWithSlash(AzureFunctionUrl);
             this.userId = userId;
             httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("x-ms-signalr-userid", userId);
-           
-            //TODO 1.1 feature; add SharedSecret to public Azure Function.
-            //httpClient.DefaultRequestHeaders.Add("x-bf-sharedsecret", "");
+            httpClient.DefaultRequestHeaders.Add("x-functions-key", FunctionHostKey);
         }
 
         private string urlEndsWithSlash(string url)

@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 
 namespace Bitfox.AzureBroadcast
 {
-
         public class BroadcastMessage : IBroadcastInfo {
             [JsonProperty(PropertyName = "jm")]
             public string jsonmessage {get; set;}
