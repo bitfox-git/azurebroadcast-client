@@ -59,8 +59,11 @@ client.SendToGroup(msg, 'my-test-channel');
 client.SendToUser(msg, 'some user id'); 
 ```
 
+## Design considerations
 
+SignalR provide several options to seperate between things like: multiple message structures, the methods begins called on the receiver and multiple hubs. This library uses only one hub and one client method (onMessage) and one (custom) message, with the idea that for most use cases it's sufficient to see SignalR as communication medium only and solve other needs on a higher level.
 
+For example: Seperating clients can be done within one hub by joining and leaving groups. Multiple actions on the clients can be achieved by adding an `action` property in your custom messages and respond accordingly to it's received value. This whole idea speeds up the development process because new actions, new channels can be done without any changes to the Azure setup of both Azure SignalR service as well as the Azure Functions, once deployed, you're done. On the down side you will have to fit everything in one message format (action, parameters, messages, etc.) which could result in larger transfers because of unused fields in your message.
 
 
 ## Installation
