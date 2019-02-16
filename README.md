@@ -1,4 +1,4 @@
-Part of the Serverless Azure-based .Net 2.0 Standard Broadcast solution. 
+Part of the Serverless Azure-based .Net 2.0 Standard Broadcast solution.
 
 [![Build Status](https://dev.azure.com/bitfox/AzureBroadcast.Client/_apis/build/status/BuildPipeline%20AzureBroadcast.Client?branchName=master)](https://dev.azure.com/bitfox/AzureBroadcast.Client/_build/latest?definitionId=5&branchName=master)
 
