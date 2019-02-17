@@ -9,6 +9,10 @@
     <RepositoryUrl>https://github.com/bitfox-git/azurebroadcast-client</RepositoryUrl>
     <Authors>Lucas Vos</Authors>
     <Company>Bitfox</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>azure signalr functions serverless</PackageTags>
+    <PackageIconUrl>icon.png</PackageIconUrl>
+    <Description>Use Azure SignalR service in Serverless mode with standarized Azure Functions and corresponding client library.</Description>
   </PropertyGroup>
 
   <ItemGroup>
