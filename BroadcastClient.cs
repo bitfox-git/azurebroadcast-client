@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 
 namespace Bitfox.AzureBroadcast
 {
-
+    /// <summary>
+    /// A client to send messages via a predefined Azure Functions and Azure SignalR service.
+    /// </summary>
+    /// <typeparam name="T">string or your custom message class.</typeparam>
     public class BroadcastClient<T>
     {
 
@@ -16,15 +19,44 @@ namespace Bitfox.AzureBroadcast
         private string baseAzureFunctionUrl;
         private string userId;
 
-
+        /// <summary>
+        /// Add a handler to receive your messages.
+        /// </summary>
         public Action<T, IBroadcastInfo> onMessage = null;
 
+        /// <summary>
+        /// Return the connection status of this client.
+        /// </summary>
+        public bool IsConnected { 
+            get {
+                if (connection==null) { return false; }
+                return (connection.State == HubConnectionState.Connected);
+            }
+        }
+
+
+        /// <summary>
+        /// If true then messages originating from this userid, are not notified on the onMessage handler.
+        /// </summary>
+        public bool FilterOwnMessages { get; set; } = false;
+
+        /// <summary>
+        /// Creates a new BroadcastClient
+        /// </summary>
+        /// <param name="AzureFunctionUrl">The URL with /api of the Azure Functions</param>
+        /// <param name="FunctionHostKey">The host key to access the protected Azure Functions</param>
         public BroadcastClient(string AzureFunctionUrl, string FunctionHostKey) :
             this(AzureFunctionUrl, FunctionHostKey, Guid.NewGuid().ToString())
         {
             
         }
 
+        /// <summary>
+        /// Creates a new BroadcastClient with a specific userid
+        /// </summary>
+        /// <param name="AzureFunctionUrl">The URL with /api of the Azure Functions</param>
+        /// <param name="FunctionHostKey">The host key to access the protected Azure Functions</param>
+        /// <param name="userId">A custom userid</param>
         public BroadcastClient(string AzureFunctionUrl, string FunctionHostKey, string userId)
         {
             this.baseAzureFunctionUrl = urlEndsWithSlash(AzureFunctionUrl);
@@ -43,12 +75,15 @@ namespace Bitfox.AzureBroadcast
         {
             var url = $"{baseAzureFunctionUrl}api/negotiate";
             var response = await httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             var connectionInfo = JsonConvert.DeserializeObject<SignalRConnectionInfo>(content);
             return connectionInfo;
         }
 
-
+        /// <summary>
+        /// Setup and connect to SignalR. Starts listening for incoming messages.
+        /// </summary>
         public async void Start()
         {
             //Prevent multiple starts.
@@ -76,13 +111,21 @@ namespace Bitfox.AzureBroadcast
             connection.On<string>("newMessage", (wrappedmessage) =>
             {
                 BroadcastMessage messageObject = JsonConvert.DeserializeObject<BroadcastMessage>(wrappedmessage);
-                T message = JsonConvert.DeserializeObject<T>(messageObject.jsonmessage);
-                onMessage?.Invoke(message, messageObject);
+                if (!((messageObject.fromUser == userId) & FilterOwnMessages))
+                {
+                    T message = JsonConvert.DeserializeObject<T>(messageObject.jsonmessage);
+                    onMessage?.Invoke(message, messageObject);
+                }
+           
             });
 
             await connection.StartAsync();
         }
 
+        /// <summary>
+        /// Send message to every connected client.
+        /// </summary>
+        /// <param name="message"></param>
         public async void Send(T message)
         {
             var url = $"{baseAzureFunctionUrl}api/broadcast";
@@ -97,6 +140,11 @@ namespace Bitfox.AzureBroadcast
             await httpClient.PostAsync(url, c);
         }
 
+        /// <summary>
+        /// Send message to a named group
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="groupName">The name of the group</param>
         public async void SendToGroup(T message, string groupName)
         {
             var url = $"{baseAzureFunctionUrl}api/broadcast";
@@ -111,6 +159,11 @@ namespace Bitfox.AzureBroadcast
             await httpClient.PostAsync(url, c);
         }
 
+        /// <summary>
+        /// Send message to specific user(id)
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="user">The userid receiving this message. UserId can be (optionally) specified in the constructor of the client</param>
          public async void SendToUser(T message, string user)
         {
             var url = $"{baseAzureFunctionUrl}api/broadcast";
@@ -125,7 +178,10 @@ namespace Bitfox.AzureBroadcast
             await httpClient.PostAsync(url, c);
         }
 
-
+        /// <summary>
+        /// This client starts listening for messages designated to the group specified.
+        /// </summary>
+        /// <param name="groupName">The name of the group</param>
         public async void JoinGroup(string groupName){
             var url = $"{baseAzureFunctionUrl}api/groupaction";
 
@@ -139,6 +195,10 @@ namespace Bitfox.AzureBroadcast
             await httpClient.PostAsync(url, c);
         }
 
+        /// <summary>
+        /// This client stops listening for messages designated to the group specified.
+        /// </summary>
+        /// <param name="groupName">The name of the group</param>
         public async void LeaveGroup(string groupName){
             var url = $"{baseAzureFunctionUrl}api/groupaction";
 
