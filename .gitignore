@@ -7,6 +7,9 @@
 samples/WinformsSample/app.config
 samples/ConsoleSample/appsettings.json
 
+.vscode/
+
+
 # Azure Functions localsettings file
 local.settings.json
 

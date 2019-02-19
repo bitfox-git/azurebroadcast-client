@@ -60,6 +60,10 @@ client.SendToUser(msg, 'some user id');
 ```
 
 Filter echoing
+``` csharp
+client.FilterOwnMessages = true;
+```
+
 
 ## Design considerations
 
@@ -88,6 +92,6 @@ Winforms and Console working with the same libary:
 
 
 But it should also work in Xamarin, Unity and ASP.NET projects as well.
- 
+
 
 
