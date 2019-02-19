@@ -1,0 +1,6 @@
+{
+  "AzureFunction": {
+    "url": "https://YOUR-SITENAME-HERE.azurewebsites.net",
+    "code": "PUT YOUR AZURE FUNCTION ACCESS CODE HERE"
+  }
+}

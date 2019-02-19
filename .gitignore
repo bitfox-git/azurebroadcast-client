@@ -4,6 +4,8 @@
 # Git specific
 .gitconfig
 
+samples/WinformsSample/app.config
+samples/ConsoleSample/appsettings.json
 
 # Azure Functions localsettings file
 local.settings.json

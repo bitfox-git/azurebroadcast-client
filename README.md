@@ -59,9 +59,13 @@ client.SendToGroup(msg, 'my-test-channel');
 client.SendToUser(msg, 'some user id'); 
 ```
 
+Filter echoing
+
 ## Design considerations
 
-SignalR provide several options to seperate between things like: multiple message structures, the methods begins called on the receiver and multiple hubs. This library uses only one hub and one client method (onMessage) and one (custom) message, with the idea that for most use cases it's sufficient to see SignalR as communication medium only and solve other needs on a higher level.
+In short: this setup sees Azure SignalR and Azure Functions as *Infrastructure* only. Any logic, grouping, multiple actions, multiple message, should be done on top of this, inside your application(s). 
+
+SignalR provide several options to seperate between things like: multiple message structures, the methods being called on the receiver and multiple hubs. This library uses only one hub and one client method (onMessage) and one (custom) message, with the idea that for most use cases it's sufficient to see SignalR as communication medium only and solve other needs on a higher level.
 
 For example: Seperating clients can be done within one hub by joining and leaving groups. Multiple actions on the clients can be achieved by adding an `action` property in your custom messages and respond accordingly to it's received value. This whole idea speeds up the development process because new actions, new channels can be done without any changes to the Azure setup of both Azure SignalR service as well as the Azure Functions, once deployed, you're done. On the down side you will have to fit everything in one message format (action, parameters, messages, etc.) which could result in larger transfers because of unused fields in your message.
 
@@ -71,5 +75,19 @@ For example: Seperating clients can be done within one hub by joining and leavin
 This client library is provided as [NuGet package](https://www.nuget.org/packages/Bitfox.AzureBroadcast.Client/).
 
 Make sure you setup the corresponding Azure Functions and Azure SignalR service as pointed out [here](https://github.com/bitfox-git/azurebroadcast-functions).
+
+## Samples
+
+Sample projects using this library can be found in the samples folder: a WinForms (Framework 4.6.1) and a Console (Core 2.1) application. 
+
+Winforms and Console working with the same libary:
+
+![](doc/SampleWinforms.png "Winforms using the Serverless Azure SignalR for messaging")
+
+![](doc/SampleConsole.png "Console using the Serverless Azure SignalR for messaging")
+
+
+But it should also work in Xamarin, Unity and ASP.NET projects as well.
+ 
 
 
